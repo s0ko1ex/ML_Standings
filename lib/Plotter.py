@@ -17,6 +17,7 @@ class Plotter:
         varInt = list(map(round, map(float, self.var)))
         
         fig, ax = plt.subplots()
+        ax.set_ylim([0, 0.12])
         n, bins, patches = ax.hist(varInt, round(len(varUnique) / 1.2), density=True)
         y = ((1 / (np.sqrt(2 * np.pi) * sd)) * np.exp(-0.5 * (1 / sd * (bins - mean))**2))
         ax.plot(bins, y, '--')
