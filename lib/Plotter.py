@@ -21,8 +21,9 @@ class Plotter:
         y = ((1 / (np.sqrt(2 * np.pi) * sd)) * np.exp(-0.5 * (1 / sd * (bins - mean))**2))
         ax.plot(bins, y, '--')
         ax.set_title('$\mu=' + str(mean) + '$ $\sigma=' + str(sd) + '$')
-        name = str(datetime.datetime.now()).split()[0]
+        now = datetime.datetime.now()
+        name = str(now).split()[0]
         pathname = self.img_dir + name + '.png'
         
-        if not os.path.isfile(pathname):
+        if (not os.path.isfile(pathname)) or (now.hour <= 12):
             plt.savefig(pathname, format='png') 
