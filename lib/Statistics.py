@@ -5,6 +5,9 @@ from scipy.special import erf, erfinv
 class Statistics:
     def __init__(self, table):
         self.table = table
+        
+        self.sortBy('Сумма', True)
+        self.mean, self.stdev = self.calcZ()
     
     def sortBy(self, name, desc = False):
         for key in self.table.keys():
@@ -31,7 +34,7 @@ class Statistics:
         self.table['Z'] = z
         return round(mean, 2), round(stdev, 2)
     
-    def stat(self, name):
+    def statName(self, name):
         def ratio(a, b):
             return round(100 - (a / b) * 100, 2)
         
@@ -63,31 +66,42 @@ class Statistics:
             W_1 = disp * (1 - 0.6695 / n ** 0.6518) / B ** 2
             
             return W_1
+        
+        def markRatio(r):
+            maxScore = 514
+            score = r * maxScore
+            if score >= 360:
+                mark = 5
+            elif score >= 200:
+                mark = 4
+            elif score >= 70:
+                mark = 3
+            else:
+                mark = 2
+            return mark
             
-            
-        self.sortBy('Сумма', True)
         pos = self.table['Имя'].index(name)
         max_pos = len(self.table['Имя'])
         pos_ratio = round(100 - (pos / max_pos) * 100, 2)
         
         score = float(self.table['Сумма'][pos])
         max_score = self.maxScore()
-        score_ratio = round((score / max_score) * 100, 2)
+        score_mark = markRatio(score / max_score)
         
-        mean, stdev = self.calcZ()
+        mean, stdev = self.mean, self.stdev
         z = self.table['Z'][pos]
         
         maxarea = erfarea(self.table['Z'][0])
         nextarea = min(erfarea(z) + 10, maxarea) / 100
         score_nextz = round((erfmark(nextarea) - z) * stdev)
         
-        line = 52
+        line = 55
         n = (line - len(name) - 2) // 2
         
         print('=' * n + ' ' + name + ' ' + '=' * n)
-        print('Баллов: ' + str(score) + ' из ' + str(max_score) + '\t(' + str(score_ratio) + '% из всех возможных)')
+        print('Баллов: ' + str(score) + ' из ' + str(max_score) + '\t(Предварительная оценка -- ' + str(score_mark) + ')')
         print('Z:\t' + str(z) + '\t\t(лучше, чем ' + str(erfarea(z)) + '%)')
-        print('Место:\t' + str(pos) + ' из ' + str(max_pos))
+        print('Место:\t' + str(pos + 1) + ' из ' + str(max_pos))
         print('-' * line)
         
         print('Чтобы обойти следующие 10%, нужно ' + str(score_nextz) + ' баллов')
@@ -103,5 +117,36 @@ class Statistics:
             print('Существенное отклонение от нормального распределения (W_1 = ' + str(W) + ')')
             
         pltr = Plotter(self.table['Сумма'])
-        pltr.plot(mean, stdev) 
+        pltr.plot(mean, stdev, W) 
  
+    def statTop(self, name):
+        n = 10
+        
+        start = max(self.table['Имя'].index(name) - n // 2, 0) if name != '' else 0
+        end = start + n
+        
+        x = len(str(end))
+        maxName = max(map(len, self.table['Имя'][start:end])) + 1
+
+        wings = []
+        wings += [(x + 1 + (maxName - 3) // 2) * '=']
+        wings += [(3 + (maxName - 3) // 2) * '=']
+        wings += [5 * '=']
+        wings += [2 * '=']
+        print(wings[0] + 'Имя' + wings[1] + 'Z' + wings[2] + 'Сумма' + wings[3])
+        
+        for i in range(start, end):
+            name = self.table['Имя'][i]
+            z = self.table['Z'][i]
+            score = self.table['Сумма'][i]
+            print(f'{i+1:{x}}) {name:{maxName}} {z}   {score}')
+
+
+
+
+
+
+
+
+
+

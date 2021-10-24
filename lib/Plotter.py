@@ -11,7 +11,7 @@ class Plotter:
         if not os.path.exists(self.img_dir):
             os.makedirs(self.img_dir)
         
-    def plot(self, mean, sd):
+    def plot(self, mean, sd, w):
         varUnique = list(set(self.var))
         varCounts = [self.var.count(x) for x in varUnique]
         varInt = list(map(round, map(float, self.var)))
@@ -19,15 +19,14 @@ class Plotter:
         varMax  = max(varCounts)
                 
         fig, ax = plt.subplots()
-        ax.set_ylim([0, max(65, varMax)])
-        n, bins, patches = ax.hist(varInt, round(len(varUnique) / 1.2))
+        ax.set_ylim([0, max(100, varMax)])
+        n, bins, patches = ax.hist(varInt, len(varUnique))
         y = (1 / (np.sqrt(2 * np.pi) * sd)) * np.exp(-0.5 * ((bins - mean) / sd)**2)
         ax.plot(bins, varKoef * y, '--')
         
         now = datetime.datetime.now()
         name = str(now).split()[0]
-        ax.set_title(name + ' ($\mu=' + str(mean) + '$, $\sigma=' + str(sd) + '$)')
+        ax.set_title(name + ' ($\mu=' + str(mean) + '$, $\sigma=' + str(sd) + '$, $W_1=' + str(w) + '$)')
         
         pathname = self.img_dir + name + '.png'
-        if (not os.path.isfile(pathname)) or (now.hour <= 12):
-            plt.savefig(pathname, format='png') 
+        plt.savefig(pathname, format='png') 
