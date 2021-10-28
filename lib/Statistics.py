@@ -123,7 +123,7 @@ class Statistics:
         n = 10
         
         start = max(self.table['Имя'].index(name) - n // 2, 0) if name != '' else 0
-        end = start + n
+        end = min(start + n, len(self.table['Имя']))
         
         x = len(str(end))
         maxName = max(map(len, self.table['Имя'][start:end])) + 1
