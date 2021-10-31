@@ -33,7 +33,6 @@ if __name__ == '__main__':
     old_help = parser.print_help
     parser.print_help = new_help(old_help)
 
-    mut = parser.add_mutually_exclusive_group()
     group = parser.add_argument_group('необходимая группа аргументов')
     parser.add_argument('-u', action='store_true', help='обновить принудительно')
     group.add_argument('-l', action='store_true', help='войти в систему из терминала')
