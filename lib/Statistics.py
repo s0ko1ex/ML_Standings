@@ -125,24 +125,14 @@ class Statistics:
         end = min(start + n, len(self.table['Имя']))
         
         x = len(str(end))
-        maxName = max(map(len, self.table['Имя'][start:end])) + 1
-        maxZ = max(map(lambda a: len(str(a)), self.table['Z'][start:end])) + 1
-        maxScore = max(map(lambda a: len(str(a)), self.table['Сумма'][start:end])) + 1
+        maxName = max(map(len, self.table['Имя'][start:end])) + 2
+        maxZ = max(map(lambda a: len(str(a)), self.table['Z'][start:end])) + 2
+        maxScore = max(map(lambda a: len(str(a)), self.table['Сумма'][start:end])) + 2
 
-        print(f'{"Имя":=^{maxName + x + 2}}{"Z":=^{maxZ}}{"=" * 2}{"Сумма":=^{maxScore + 3}}')
+        print(f'{"Имя":=^{maxName + x + 2}}{"Z":=^{maxZ}}{"Сумма":=<{maxScore}}')
         
         for i in range(start, end):
             name = self.table['Имя'][i]
             z = self.table['Z'][i]
             score = self.table['Сумма'][i]
-            print(f'{i+1:{x}}) {name:<{maxName}}{z:<{maxZ + 3}}{score:<{maxScore}}')
-
-
-
-
-
-
-
-
-
-
+            print(f'{i+1:{x}}) {name:<{maxName}}{z:<{maxZ}}{score:<{maxScore}}')
