@@ -33,7 +33,7 @@ if __name__ == '__main__':
     old_help = parser.print_help
     parser.print_help = new_help(old_help)
 
-    group = parser.add_argument_group('обязательная группа аргументов')
+    group = parser.add_argument_group('обязательные аргументы (должен присутствовать хотя бы один)')
     parser.add_argument('-u', action='store_true', help='обновить принудительно')
     group.add_argument('-l', action='store_true', help='войти в систему из терминала')
     group.add_argument('-s', action='store_true', help='общая статистика')
