@@ -1,42 +1,70 @@
+#!/usr/bin/env python3
 from lib.Loader import Loader
 from lib.Statistics import Statistics
-import sys
+import argparse
+from lib.Utils import get_headers, login
 
-def helpMsg():
-    print("Статист по машинке (C) ediah")
-    print("Флаги:\n\t-h\tВывести это сообщение и выйти")
-    print("\t-u\tОбновить принудительно\n\t-s\tОбщая статистика")
-    print("\t-n\tПоиск по фамилии с именем")
-    exit(0)
+import gettext
+
+tr = gettext.translation('argparse', 'translation', ['ru'], fallback=True)
+argparse._ = tr.gettext
+argparse.ngettext = tr.ngettext
+
+cool_msg = """
+     __  __ _      ___ _                _ _              
+    |  \/  | |    / __| |_ __ _ _ _  __| (_)_ _  __ _ ___
+    | |\/| | |__  \__ \  _/ _` | ' \/ _` | | ' \/ _` (_-<
+    |_|  |_|____| |___/\__\__,_|_||_\__,_|_|_||_\__, /__/
+                                                |___/    
+
+    Статист по машинке (C) ediah
+
+"""
+
+def new_help(func):
+    def printer():
+        print(cool_msg)
+        func()
+    return printer
 
 if __name__ == '__main__':
-    update = False
-    stats = False
-    name = ''
-    
-    for i in range(1, len(sys.argv)):
-        arg = sys.argv[i]
-        if arg == '-h':
-            helpMsg()
-        elif arg == '-u':
-            update = True
-        elif arg == '-s':
-            stats = True
-        elif arg == '-n':
-            name = sys.argv[i+1]
-    
-    
+    parser = argparse.ArgumentParser(usage = 'main.py [-h] [-u] (-l | -s | -n N)')
 
-    with open('headers.txt', 'r') as cookie:
-        headers = eval(cookie.read())
+    old_help = parser.print_help
+    parser.print_help = new_help(old_help)
 
-    ldr = Loader(headers, update)
+    group = parser.add_argument_group('обязательные аргументы (должен присутствовать хотя бы один)')
+    parser.add_argument('-u', action='store_true', help='обновить принудительно')
+    group.add_argument('-l', action='store_true', help='войти в систему из терминала')
+    group.add_argument('-s', action='store_true', help='общая статистика')
+    group.add_argument('-n', default='', help='поиск по фамилии с именем')
+    args = parser.parse_args()
+
+    if not (args.s or args.n or args.l):
+        print(f'{__file__}: ошибка: аргументы -s, -n, -l: ожидался хотя бы один аргумент из группы')
+        exit(1)
+
+    if args.l:
+        login()
+        exit(0)
+
+    headers = get_headers()
+
+    ldr = Loader(headers, args.u)
     sts = Statistics(ldr.table)
     
-    if stats:
-        sts.statTop(name)
+    if args.s:
+        try:
+            sts.statTop(args.n)
+        except ValueError as err:
+            if 'is not in list' in str(err):
+                print('Ошибка! Имя в таблице не найдено')
     else:
-        if name == '':
-            print("Не указано имя для поиска!")
+        if args.n == '':
+            print('Не указано имя для поиска!')
             exit(1)
-        sts.statName(name)
+        
+        try:
+            sts.statName(args.n)
+        except ValueError:
+            print('Ошибка! Имя в таблице не найдено')

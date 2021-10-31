@@ -1,0 +1,4 @@
+beautifulsoup4>=4.9.3
+requests>=2.25.1
+matplotlib>=3.4.3
+scipy>=1.6.2
