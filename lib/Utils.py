@@ -10,7 +10,7 @@ def get_session_cookie():
     soup = BeautifulSoup(ans.text, 'html.parser')
     csrf_token = soup.find(id='csrf_token')['value']
     ans = sesh.post('https://cv-gml.ru/login', 
-                    data={'email':input('Введите имейл: '), 
+                    data={'email':input('Введите почту: '), 
                         'password':getpass('Введите пароль: '), 
                         'csrf_token': csrf_token})
 

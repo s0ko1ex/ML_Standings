@@ -28,12 +28,12 @@ def new_help(func):
     return printer
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(usage = 'main.py [-h] [-l] [-u] (-s | -n N)')
+    parser = argparse.ArgumentParser(usage = 'main.py [-h] [-u] (-l | -s | -n N)')
 
     old_help = parser.print_help
     parser.print_help = new_help(old_help)
 
-    group = parser.add_argument_group('необходимая группа аргументов')
+    group = parser.add_argument_group('обязательная группа аргументов')
     parser.add_argument('-u', action='store_true', help='обновить принудительно')
     group.add_argument('-l', action='store_true', help='войти в систему из терминала')
     group.add_argument('-s', action='store_true', help='общая статистика')
