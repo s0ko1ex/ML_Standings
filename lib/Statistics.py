@@ -82,7 +82,6 @@ class Statistics:
             
         pos = self.table['Имя'].index(name)
         max_pos = len(self.table['Имя'])
-        pos_ratio = round(100 - (pos / max_pos) * 100, 2)
         
         score = float(self.table['Сумма'][pos])
         max_score = self.maxScore()

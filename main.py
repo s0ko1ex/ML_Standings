@@ -55,9 +55,17 @@ if __name__ == '__main__':
     sts = Statistics(ldr.table)
     
     if args.s:
-        sts.statTop(args.n)
+        try:
+            sts.statTop(args.n)
+        except ValueError as err:
+            if 'is not in list' in str(err):
+                print('Ошибка! Имя в таблице не найдено')
     else:
         if args.n == '':
-            print("Не указано имя для поиска!")
+            print('Не указано имя для поиска!')
             exit(1)
-        sts.statName(args.n)
+        
+        try:
+            sts.statName(args.n)
+        except ValueError:
+            print('Ошибка! Имя в таблице не найдено')
