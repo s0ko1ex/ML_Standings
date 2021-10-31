@@ -53,4 +53,4 @@ python main.py -h
 
 ## Скриншот
 
-![Запуск](./sample_img/stats.img)
+![Запуск](./sample_img/stats.png)
