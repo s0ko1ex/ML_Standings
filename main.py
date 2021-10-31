@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from lib.Loader import Loader
 from lib.Statistics import Statistics
 import argparse
