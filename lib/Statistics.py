@@ -96,25 +96,24 @@ class Statistics:
         score_nextz = round((erfmark(nextarea) - z) * stdev)
         
         line = 55
-        n = (line - len(name) - 2) // 2
         
-        print('=' * n + ' ' + name + ' ' + '=' * n)
-        print('Баллов: ' + str(score) + ' из ' + str(max_score) + '\t(Предварительная оценка -- ' + str(score_mark) + ')')
-        print('Z:\t' + str(z) + '\t\t(лучше, чем ' + str(erfarea(z)) + '%)')
-        print('Место:\t' + str(pos + 1) + ' из ' + str(max_pos))
+        print(f'{" %s " % name:=^{line}}')
+        print(f'Баллов: {score} из {max_score}\t(Предварительная оценка -- {score_mark})')
+        print(f'Z:\t{z}\t\t(лучше, чем {erfarea(z)}%)')
+        print(f'Место:\t{pos + 1} из {max_pos}')
         print('-' * line)
         
-        print('Чтобы обойти следующие 10%, нужно ' + str(score_nextz) + ' баллов')
+        print(f'Чтобы обойти следующие 10%, нужно {score_nextz} баллов')
         
         print('-' * line)
-        print('Среднее: ' + str(mean) + ', Стандартное отклонение: ' + str(stdev))
+        print(f'Среднее: {mean}, Стандартное отклонение: {stdev}')
         
         W = round(isNormal(), 2)
         
         if W >= 1:
-            print('Распределение можно считать нормальным (W_1 = ' + str(W) + ')')
+            print(f'Распределение можно считать нормальным (W_1 = {W})')
         else:
-            print('Существенное отклонение от нормального распределения (W_1 = ' + str(W) + ')')
+            print(f'Существенное отклонение от нормального распределения (W_1 = {W})')
             
         pltr = Plotter(self.table['Сумма'])
         pltr.plot(mean, stdev, W) 
@@ -127,19 +126,16 @@ class Statistics:
         
         x = len(str(end))
         maxName = max(map(len, self.table['Имя'][start:end])) + 1
+        maxZ = max(map(lambda a: len(str(a)), self.table['Z'][start:end])) + 1
+        maxScore = max(map(lambda a: len(str(a)), self.table['Сумма'][start:end])) + 1
 
-        wings = []
-        wings += [(x + 1 + (maxName - 3) // 2) * '=']
-        wings += [(3 + (maxName - 3) // 2) * '=']
-        wings += [5 * '=']
-        wings += [2 * '=']
-        print(wings[0] + 'Имя' + wings[1] + 'Z' + wings[2] + 'Сумма' + wings[3])
+        print(f'{"Имя":=^{maxName + x + 2}}{"Z":=^{maxZ}}{"=" * 2}{"Сумма":=^{maxScore + 3}}')
         
         for i in range(start, end):
             name = self.table['Имя'][i]
             z = self.table['Z'][i]
             score = self.table['Сумма'][i]
-            print(f'{i+1:{x}}) {name:{maxName}} {z}   {score}')
+            print(f'{i+1:{x}}) {name:<{maxName}}{z:<{maxZ + 3}}{score:<{maxScore}}')
 
 
 
