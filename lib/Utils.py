@@ -9,12 +9,12 @@ def get_session_cookie():
     ans = sesh.get('https://cv-gml.ru/login')
     soup = BeautifulSoup(ans.text, "html.parser")
     csrf_token = soup.find(id='csrf_token')['value']
-    answ = sesh.post("https://cv-gml.ru/login", 
+    ans = sesh.post("https://cv-gml.ru/login", 
                     data={'email':input('Enter email: '), 
                         'password':getpass('Enter password: '), 
                         'csrf_token': csrf_token})
 
-    if answ.status_code != 200:
+    if ans.status_code != 200 or 'Неправильный логин или пароль' in ans.text:
         print('Error! Login failed')
         exit(1)
     
