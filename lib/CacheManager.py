@@ -6,10 +6,29 @@ class CacheManager:
         self.cached_file = self.cache_dir + filename
         self.force_update = force_update
         self.max_lifetime = 60 * 60 * 3    # 3 часа
+        self.updater = None
+        self.updater_args = None
+        self.updater_kwargs = None
         
         if not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
-        
+
+    def ifOld(self, func, *args, **kwargs):
+        self.updater = func
+        self.updater_args = args
+        self.updater_kwargs = kwargs
+
+    def decide(self):
+        if self.updater == None:
+            raise RuntimeError("Функция-актуализатор неизвестна менеджеру кэша!" + \
+                               " Воспользуйтесь CacheManager.ifOld(...)")
+
+        if self.needUpdate():
+            return self.updater(*self.updater_args, **self.updater_kwargs)
+        else:
+            return self.read()
+
+
     def needUpdate(self):
         cache_exist = os.path.isfile(self.cached_file)
         need_update = False

@@ -6,34 +6,38 @@ class Loader:
     def __init__(self, headers, update = False):
         self.session = requests.session()
         self.headers = headers
-        self.url = 'https://cv-gml.ru/course/2/standings'
+        self.url = 'https://cv-gml.ru/course/2'
         self.head = []
         self.body = []
         self.table = {}
         
-        cache = CacheManager('table.cache', update)
-        
-        if cache.needUpdate():
-            self.load(update)
+        def updater(cache):
+            self.loadTable(update)
             self.makeTable()
             cache.write(str(self.table) + '\n')
-        else:
-            self.table = eval(cache.read())
+            return str(self.table)
 
-    def load(self, update = False, url = ''):
+        cache = CacheManager('table.cache', update)
+        cache.ifOld(updater, cache)
+        data = cache.decide()
+        self.table = eval(data)
+
+    
+
+    def loadTable(self, update = False, url = ''):
         if (url == ''):
-            url = self.url
-            
-        cache = CacheManager(url[url.rfind('/')+1:] + '.cache', update)
+            url = self.url + '/standings'
 
-        if cache.needUpdate():
+        def updater(url, cache):
             data = self.session.get(url, headers=self.headers)
             data = data.content.decode('utf-8')
-            page = HTMLPage(data)
             cache.write(data)
-        else:
-            data = cache.read()
-            page = HTMLPage(data)
+            return data
+
+        cache = CacheManager(url[url.rfind('/')+1:] + '.cache', update)
+        cache.ifOld(updater, url, cache)
+        data = cache.decide()
+        page = HTMLPage(data)
 
         table = page.getBlocks('table')
         thead = table.getBlocks('thead')
@@ -68,3 +72,6 @@ class Loader:
                 t.append(x[i])
             
             self.table[key] = t
+
+    def loadDeadline(self, taskNum):
+        url = self.url + '/task/' + str(taskNum)
