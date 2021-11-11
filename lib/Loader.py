@@ -1,5 +1,6 @@
 from lib.CacheManager import CacheManager
 from lib.HTMLPage import HTMLPage
+from datetime import datetime
 import requests
 
 class Loader:
@@ -22,12 +23,7 @@ class Loader:
         data = cache.decide()
         self.table = eval(data)
 
-    
-
-    def loadTable(self, update = False, url = ''):
-        if (url == ''):
-            url = self.url + '/standings'
-
+    def _loadPage(self, url, update):
         def updater(url, cache):
             data = self.session.get(url, headers=self.headers)
             data = data.content.decode('utf-8')
@@ -37,7 +33,13 @@ class Loader:
         cache = CacheManager(url[url.rfind('/')+1:] + '.cache', update)
         cache.ifOld(updater, url, cache)
         data = cache.decide()
-        page = HTMLPage(data)
+        return HTMLPage(data)
+
+    def loadTable(self, update = False, url = ''):
+        if (url == ''):
+            url = self.url + '/standings'
+
+        page = self._loadPage(url, update)
 
         table = page.getBlocks('table')
         thead = table.getBlocks('thead')
@@ -73,5 +75,21 @@ class Loader:
             
             self.table[key] = t
 
-    def loadDeadline(self, taskNum):
+    def loadDeadline(self, taskNum, update = False):
         url = self.url + '/task/' + str(taskNum)
+        page = self._loadPage(url, update)
+
+        blocks = page.getBlocks('h4')
+        # Только у ноутбуков 2 дедлайна, у остальных заданий только одно
+        if isinstance(blocks, list):
+            date = ''
+            for i in range(len(blocks)):
+                if blocks[i].data.find('Срок') != -1:
+                    date = blocks[i]
+        else:
+            date = blocks
+        
+        date = date.data.strip()
+        date = date[date.find(' ', date.find(' ') + 1) + 1:]
+        dt = datetime.strptime(date, "%d.%m.%Y в %H:%M")
+        return datetime.now() > dt

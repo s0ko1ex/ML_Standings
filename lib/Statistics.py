@@ -1,13 +1,27 @@
 from lib.Plotter import Plotter
 from math import sqrt
 from scipy.special import erf, erfinv
+from collections import OrderedDict
 
 class Statistics:
     def __init__(self, table):
         self.table = table
-        
+        self.lastTaskNum = None
+
         self.sortBy('Сумма', True)
         self.mean, self.stdev = self.calcZ()
+
+    def setTimePoint(self, tp):
+        self.lastTask = tp
+
+    def lastTask(self):
+        tasks = list(self.table.keys())
+        tasks = tasks[:tasks.index('Сумма')]
+        tasks = map(lambda x: 
+            x[: x.rfind(' ') if x.rfind(' ') > 0 else len(x)], 
+            tasks)
+        tasks = list(OrderedDict.fromkeys(tasks))
+        return len(tasks) - 1
     
     def sortBy(self, name, desc = False):
         for key in self.table.keys():
@@ -34,6 +48,9 @@ class Statistics:
         self.table['Z'] = z
         return round(mean, 2), round(stdev, 2)
     
+    def statOldPos(self, name):
+        pass
+
     def statName(self, name):
         def ratio(a, b):
             return round(100 - (a / b) * 100, 2)

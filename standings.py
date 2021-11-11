@@ -28,7 +28,7 @@ def new_help(func):
     return printer
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(usage = 'main.py [-h] [-u] (-l | -s | -n N)')
+    parser = argparse.ArgumentParser(usage = 'main.py [-h] [-u] (-l | -s | -n N | -t T)')
 
     old_help = parser.print_help
     parser.print_help = new_help(old_help)
@@ -38,6 +38,7 @@ if __name__ == '__main__':
     group.add_argument('-l', action='store_true', help='войти в систему из терминала')
     group.add_argument('-s', action='store_true', help='общая статистика')
     group.add_argument('-n', default='', help='поиск по фамилии с именем')
+    group.add_argument('-t', default='', help='установить номер задачи для вывода смещения в позиции')
     args = parser.parse_args()
 
     if not (args.s or args.n or args.l):
@@ -52,6 +53,11 @@ if __name__ == '__main__':
 
     ldr = Loader(headers, args.u)
     sts = Statistics(ldr.table)
+
+    tp = args.t if args.t != '' else sts.lastTask() # Task for Position (Timeline Point)
+    while not ldr.loadDeadline(tp):
+        tp = tp - 1
+    sts.setTimePoint(tp)
     
     if args.s:
         try:
