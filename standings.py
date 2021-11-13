@@ -28,7 +28,7 @@ def new_help(func):
     return printer
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(usage = 'main.py [-h] [-u] (-l | -s | -n N | -t T)')
+    parser = argparse.ArgumentParser(usage = f'{__file__} [-h] [-u] [-t T] (-l | -s | -n N)')
 
     old_help = parser.print_help
     parser.print_help = new_help(old_help)
@@ -48,6 +48,10 @@ if __name__ == '__main__':
     if args.l:
         login()
         exit(0)
+    
+    if int(args.t) < 1:
+        print(f"Ожидалось T > 0, но получено {args.t} <= 0")
+        exit(1)
 
     headers = get_headers()
 
@@ -66,6 +70,7 @@ if __name__ == '__main__':
         except ValueError as err:
             if 'is not in list' in str(err):
                 print('Ошибка! Имя в таблице не найдено')
+                exit(1)
     else:
         if args.n == '':
             print('Не указано имя для поиска!')
@@ -75,3 +80,4 @@ if __name__ == '__main__':
             sts.statName(args.n)
         except ValueError:
             print('Ошибка! Имя в таблице не найдено')
+            exit(1)
