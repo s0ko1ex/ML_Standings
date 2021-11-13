@@ -54,10 +54,11 @@ if __name__ == '__main__':
     ldr = Loader(headers, args.u)
     sts = Statistics(ldr.table)
 
-    tp = args.t if args.t != '' else sts.lastTask() # Task for Position (Timeline Point)
+    tp = int(args.t) if args.t != '' else sts.lastTask() # Task for Position (Timeline Point)
     while not ldr.loadDeadline(tp):
         tp = tp - 1
     sts.setTimePoint(tp)
+    sts.statOldPos()
     
     if args.s:
         try:
