@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from lib.Loader import Loader
 from lib.Statistics import Statistics
-import argparse
 from lib.Utils import get_headers, login
 
 import gettext
+import argparse
 
 tr = gettext.translation('argparse', 'translation', ['ru'], fallback=True)
 argparse._ = tr.gettext
@@ -49,7 +49,7 @@ if __name__ == '__main__':
         login()
         exit(0)
     
-    if int(args.t) < 1:
+    if args.t != '' and int(args.t) < 1:
         print(f"Ожидалось T > 0, но получено {args.t} <= 0")
         exit(1)
 
@@ -58,11 +58,9 @@ if __name__ == '__main__':
     ldr = Loader(headers, args.u)
     sts = Statistics(ldr.table)
 
-    tp = int(args.t) if args.t != '' else sts.lastTask() # Task for Position (Timeline Point)
-    while not ldr.loadDeadline(tp):
-        tp = tp - 1
-    sts.setTimePoint(tp)
-    sts.statOldPos()
+    sts.getTasks()
+    dls = ldr.loadAllDeadlines(len(sts.tasks))
+    sts.prepare(args.t, dls)
     
     if args.s:
         try:

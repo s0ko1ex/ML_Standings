@@ -2,6 +2,7 @@ from lib.Plotter import Plotter
 from math import sqrt
 from scipy.special import erf, erfinv
 from collections import OrderedDict
+from datetime import datetime
 
 COLOUR_GREEN = '\033[32m'
 COLOUR_RED = '\033[31m'
@@ -15,22 +16,43 @@ class Statistics:
 
         self.mean, self.stdev = self.calcZ()
 
+    def prepare(self, tp, dls):
+        self.sortTableTasks(dls)
+        self.sortTasks(dls)
+        self.setTimePoint(tp)
+        self.statOldPos()
+
     def setTimePoint(self, tp):
-        self.lastTaskNum = tp
+        self.lastTaskNum = self.lastTaskNum if tp == '' else min(int(tp), self.lastTaskNum)
 
     def getTasks(self):
         tasks = list(self.table.keys())
         tasks = tasks[:tasks.index('Сумма')]
-        tasks = map(lambda x: 
-            x[: x.rfind(' ') if x.rfind(' ') > 0 else len(x)], 
-            tasks)
-        self.tasks = list(OrderedDict.fromkeys(tasks))
-
-    def lastTask(self):
-        if self.tasks is None:
-            self.getTasks()
-        return len(self.tasks) - 1
+        self.tasks = list(OrderedDict.fromkeys(tasks))[1:]
     
+    def sortTasks(self, dls):
+        key = lambda pair: pair[0]
+        srt = sorted(zip(dls, self.tasks), key=key)
+        self.tasks = [x for _, x in srt]
+        
+        dls = sorted(dls)
+        self.lastTaskNum = sum([datetime.now() > x for x in dls]) - 1
+    
+    def sortTableTasks(self, dls):
+        tailIdx = list(self.table.keys()).index('Сумма') - 1
+        tableTasks = list(self.table.items())[1:]
+        tableTasks = tableTasks[:tailIdx]
+
+        tableHead = list(self.table.items())[:1]
+        tableTail = list(self.table.items())[tailIdx:]
+
+        # Ключ: извлечение срока сдачи/рецензирования задания
+        key = lambda pair: dls[self.tasks.index(pair[0])]
+        tableTasks = sorted(tableTasks, key=key)
+        
+        table = tableHead + tableTasks + tableTail
+        self.table = dict(table)
+
     def sortBy(self, name, desc = False):
         if isinstance(self.table[name][0], str):
             sortKey = lambda pair: float(pair[0].split()[-1]) if len(pair[0]) > 0 else 10**5
@@ -51,9 +73,9 @@ class Statistics:
     
     def maxScore(self):
         score = 0
-        for key in self.table.keys():
-            if key.find('Оценка') != -1:
-                score += max([float(x) if x != '' else 0 for x in self.table[key]])
+        keys = list(self.table.keys())
+        for key in keys[1:keys.index('Сумма')]:
+            score += max([float(x) if x != '' else 0 for x in self.table[key]])
         return score
     
     def calcZ(self):
@@ -66,17 +88,12 @@ class Statistics:
         return round(mean, 2), round(stdev, 2)
     
     def statOldPos(self):
-        if self.tasks is None:
-            self.getTasks()
         task = self.tasks[self.lastTaskNum]
         
         studs = len(self.table['Сумма'])
         sumt = [0 for i in range(studs)]
 
         for v in list(self.table.keys())[1:]: # Первая колонка с именами
-            if v.find('Оценка') == -1: # Складываем только оценки
-                continue
-
             sumt = [float(x if x != '' else 0) + y for x, y in zip(self.table[v], sumt)]
 
             if v.find(task) != -1:
@@ -155,7 +172,7 @@ class Statistics:
         
         maxarea = erfarea(self.table['Z'][0])
         nextarea = min(erfarea(z) + 10, maxarea) / 100
-        score_nextz = round((erfmark(nextarea) - z) * stdev)
+        score_nextz = round((erfmark(nextarea) - z) * stdev, 1)
 
         shift = self.genShift(pos)
         

@@ -1,11 +1,11 @@
 import time, os
 
 class CacheManager:
-    def __init__(self, filename, force_update = False):
+    def __init__(self, filename, force_update = False, lifetime = 3):
         self.cache_dir = './cache/'
         self.cached_file = self.cache_dir + filename
         self.force_update = force_update
-        self.max_lifetime = 60 * 60 * 3    # 3 часа
+        self.max_lifetime = 60 * 60 * lifetime
         self.updater = None
         self.updater_args = None
         self.updater_kwargs = None
@@ -35,7 +35,7 @@ class CacheManager:
         
         if cache_exist:
             lifetime = time.time() - os.path.getmtime(self.cached_file)
-            need_update = (lifetime > self.max_lifetime)
+            need_update = (lifetime > self.max_lifetime) and (self.max_lifetime > 0)
             
         need_update = need_update or self.force_update
         
